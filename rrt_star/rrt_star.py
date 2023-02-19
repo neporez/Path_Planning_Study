@@ -1,0 +1,231 @@
+import math
+import random
+import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
+import numpy as np
+
+
+class Node:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.cost = 0
+        self.parent = None
+
+class RRTStar:
+    def __init__(self, start, goal, obstacles, epsilon, delta, max_iter):
+        self.start = Node(start[0], start[1]) #출발점 좌표(x,y)
+        self.goal = Node(goal[0], goal[1]) #목적지 좌표(x,y)
+        self.obstacles = obstacles #장애물의 좌표와 반지름 리스트르 [x,y,r]
+        self.epsilon = epsilon #트리에서 노드 간의 거리
+        self.delta = delta #목적지까지의 확률적 편향 정도
+        self.max_iter = max_iter#최대 반복 횟수
+        self.nodes = [self.start]
+
+    def run(self):
+        for i in range(self.max_iter):
+            q = self.sample()
+            nearest_node = self.find_nearest(q)
+            new_node = self.steer(q, nearest_node)
+            if self.check_collision(new_node):
+                near_nodes = self.find_near(new_node)
+                self.rewire(new_node, near_nodes)
+                self.nodes.append(new_node)
+
+    def sample(self):
+        if random.random() > self.delta:
+            return Node(random.uniform(0, 40), random.uniform(0, 40))
+        else:
+            return self.goal
+
+    def find_nearest(self, q):
+        distances = [(n.x - q.x) ** 2 + (n.y - q.y) ** 2 for n in self.nodes]
+        return self.nodes[distances.index(min(distances))]
+
+    def steer(self, q, nearest_node):
+        theta = math.atan2(q.y - nearest_node.y, q.x - nearest_node.x)
+        x = nearest_node.x + self.epsilon * math.cos(theta)
+        y = nearest_node.y + self.epsilon * math.sin(theta)
+        new_node = Node(x, y)
+        new_node.cost = nearest_node.cost + self.epsilon
+        new_node.parent = nearest_node
+
+        return new_node
+
+    def check_collision(self, node):
+        for o in self.obstacles:
+            if (node.x - o[0]) ** 2 + (node.y - o[1]) ** 2 <= o[2] ** 2:
+                return False
+        return True
+
+    def find_near(self, node):
+        radius = min(50, math.sqrt(100 * math.log(len(self.nodes)) / len(self.nodes)))
+        distances = [(n.x - node.x) ** 2 + (n.y - node.y) ** 2 for n in self.nodes]
+        return [n for i, n in enumerate(self.nodes) if distances[i] < radius ** 2]
+
+    def rewire(self, new_node, near_nodes):
+        for n in near_nodes:
+            cost = new_node.cost + math.sqrt((n.x - new_node.x) ** 2 + (n.y - new_node.y) ** 2)
+            if cost < n.cost and self.check_collision(n):
+                n.parent = new_node
+                n.cost = cost
+                self.propagate_cost_to_leaves(n)
+
+    def propagate_cost_to_leaves(self, node):
+        for n in self.nodes:
+            if n.parent == node:
+                n.cost = node.cost + math.sqrt((n.x - node.x) ** 2 + (n.y - node.y) ** 2)
+                self.propagate_cost_to_leaves(n)
+
+    def find_goal_point_nearest(self) :
+        distances = [(n.x - self.goal.x) ** 2 + (n.y - self.goal.y) ** 2 for n in self.nodes]
+        return self.nodes[distances.index(min(distances))]
+
+    def get_path(self):
+        path = []
+        #node = self.nodes[self.nodes.index(self.goal)]
+
+        goalpoint=self.find_goal_point_nearest()
+
+        node = self.nodes[self.nodes.index(goalpoint)]
+        while node.parent:
+            path.append([node.x, node.y])
+            node= node.parent
+        path.append([self.start.x, self.start.y])
+        path.reverse()
+
+        ax = self.plot_tree()
+        for i in range(len(path) - 1):
+            ax.plot([path[i][0], path[i+1][0]], [path[i][1], path[i+1][1]], color='red',linewidth = 2)
+
+        return path
+
+    def plot_tree(self) :
+        ax = plt.subplot()
+        for node in self.nodes:
+            if(node.parent) :
+                ax.plot([node.x, node.parent.x], [node.y,node.parent.y],color = 'black')
+        return ax
+
+
+def elastic_band_path_planning(path, obs, max_iters=100, k=10, d_min=10.0, d_max=15.0, delta_t=0.1):
+    # Initialize the elastic band
+    band = []
+    for point in path:
+        band.append(point + [0])
+    band.insert(0, [0, 0, -math.pi/2])
+    band.append([0, 0, -math.pi/2])
+    n = len(band)
+
+
+    # Main loop
+    for i in range(max_iters):
+        # Compute the distance to obstacles
+        dist = []
+        for j in range(n):
+            dist.append(obs_distance(band[j][:2], obs))
+
+        # Compute the elastic band forces
+        force = [[0, 0, 0]] * n
+        for j in range(1, n - 1):
+            d = math.sqrt((band[j+1][0] - band[j-1][0])**2 + (band[j+1][1] - band[j-1][1])**2)
+            f =  [k * (d - delta_t) * (band[j+1][0] - 2 * band[j][0] + band[j-1][0])/d, k * (d - delta_t) *(band[j+1][1] - 2 * band[j][1] + band[j-1][1])/d, 0]
+            force[j] = f
+
+        for j in range(n):
+            force[j] = [max(-0.5, min(0.5, force[j][0])), max(-0.5, min(0.5, force[j][1])), 0]
+            None
+
+        # Compute the repulsive forces from obstacles
+        repulse = [[0, 0, 0]] * n
+        for j in range(1, n - 1):
+            if dist[j] < d_min:
+                repulse[j] = [(d_min - dist[j]) * g for g in obs_gradient(band[j][:2], obs)]
+            elif d_min <= dist[j] < d_max:
+                repulse[j] = [(d_max - dist[j]) * g for g in obs_gradient(band[j][:2], obs)]
+        for j in range(n):
+            repulse[j] = [max(-0.5, min(0.5, repulse[j][0])), max(-0.5, min(0.5, repulse[j][1])), 0]
+            None
+
+        # Update the band
+        for j in range(n):
+            band[j][0] += delta_t * force[j][0]
+            band[j][1] += delta_t * force[j][1]
+            band[j][0] += delta_t * repulse[j][0]
+            band[j][1] += delta_t * repulse[j][1]
+
+    # Return the updated path
+    return [point[:2] for point in band[1:-1]]
+
+def obs_distance(p, obs):
+    """
+    Compute the distance from point p to the nearest obstacle
+    """
+    return min([math.sqrt((p[0] - o[0])**2 + (p[1] - o[1])**2) for o in obs])
+
+def obs_gradient(p, obs):
+    """
+    Compute the gradient of the distance function around point p
+    """
+    epsilon = 0.1
+    dx = obs_distance([p[0] + epsilon, p[1]], obs) - obs_distance([p[0] - epsilon, p[1]], obs)
+    dy = obs_distance([p[0], p[1] + epsilon], obs) - obs_distance([p[0], p[1] - epsilon], obs)
+    return [dx / (2 * epsilon), dy / (2 * epsilon), 0]
+
+
+
+
+if __name__ == "__main__" :
+    start, goal = (20,0), (20, 40)
+    epsilon = 0.2
+    delta_goal_bias = 0.3
+    iter = 10000
+    obs_r = 1
+    step_size = 5
+    obs = []
+    obs = [[15,i,obs_r] for i in range(40)]
+    obs.extend([25,i,obs_r] for i in range(40))
+    obs.extend([[16,10,obs_r],[17,10,obs_r],[18,10,obs_r],[19,10,obs_r],[20,30,obs_r],[16,30,obs_r],[17,30,obs_r],[18,30,obs_r],[19,30,obs_r],[20,30,obs_r],[24,20,obs_r],[23,20,obs_r],[22,20,obs_r],[21,20,obs_r],[20,20,obs_r]])
+
+    fig = plt.figure(figsize=(7, 7))
+    subplot = fig.add_subplot(111)
+    subplot.set_xlabel('X-distance: m')
+    subplot.set_ylabel('Y-distance: m')
+    subplot.axis([0, 40, 0, 40])
+    subplot.plot(start[0], start[1], '*r')
+    subplot.plot(goal[0], goal[1], '*r')
+
+    for OB in obs:
+        circle = Circle(xy=(OB[0],OB[1]), radius=obs_r,alpha = 0.2)
+        subplot.add_patch(circle)
+        subplot.plot(OB[0],OB[1], 'xk')
+
+
+    rrts = RRTStar(start=start, goal=goal, obstacles=obs, epsilon=epsilon, delta=delta_goal_bias,max_iter=iter)
+    rrts.run()
+
+    path = rrts.get_path()
+
+    obs = []
+    obs = [[15,i] for i in range(40)]
+    obs.extend([25,i] for i in range(40))
+    obs.extend([[16,10],[17,10],[18,10],[19,10],[20,30],[16,30],[17,30],[18,30],[19,30],[20,30],[24,20],[23,20],[22,20],[21,20],[20,20]])
+
+    path = elastic_band_path_planning(path=path,obs=obs)
+    ##################################
+    #step_size 영향을 받는 부분, 지우면 모든 경로를 보여줌
+    """
+    path_ = []
+    i = step_size
+    while(i < len(path)) :
+        path_.append(path[i])
+        i+=step_size
+    path = path_
+    """
+    ##################################
+    px, py = [K[0] for K in path], [K[1] for K in path]  # x 좌표 목록, y 좌표 목록
+    subplot.plot(px, py, '.b')
+
+    plt.show()
+
+
