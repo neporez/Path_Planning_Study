@@ -7,7 +7,11 @@ import matplotlib.pyplot as plt
 import math
 from matplotlib.patches import Circle
 import random
-import numpy as np
+import sys,os
+
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
+from elastic_band import elastic_band
 
 
 def check_vec_angle(v1: Vector2d, v2: Vector2d):
@@ -54,70 +58,6 @@ class APF_Improved(APF):
                 rep +=(rep_1+rep_2)
         return rep
 
-def elastic_band_path_planning(path, obs, max_iters=100, k=10, d_min=10.0, d_max=15.0, delta_t=0.1):
-    # Initialize the elastic band
-    band = []
-    for point in path:
-        band.append(point + [0])
-    band.insert(0, [0, 0, -math.pi/2])
-    band.append([0, 0, -math.pi/2])
-    n = len(band)
-
-
-    # Main loop
-    for i in range(max_iters):
-        # Compute the distance to obstacles
-        dist = []
-        for j in range(n):
-            dist.append(obs_distance(band[j][:2], obs))
-
-        # Compute the elastic band forces
-        force = [[0, 0, 0]] * n
-        for j in range(1, n - 1):
-            d = math.sqrt((band[j+1][0] - band[j-1][0])**2 + (band[j+1][1] - band[j-1][1])**2)
-            f =  [k * (d - delta_t) * (band[j+1][0] - 2 * band[j][0] + band[j-1][0])/d, k * (d - delta_t) *(band[j+1][1] - 2 * band[j][1] + band[j-1][1])/d, 0]
-            force[j] = f
-
-        for j in range(n):
-            force[j] = [max(-0.5, min(0.5, force[j][0])), max(-0.5, min(0.5, force[j][1])), 0]
-            None
-
-        # Compute the repulsive forces from obstacles
-        repulse = [[0, 0, 0]] * n
-        for j in range(1, n - 1):
-            if dist[j] < d_min:
-                repulse[j] = [(d_min - dist[j]) * g for g in obs_gradient(band[j][:2], obs)]
-            elif d_min <= dist[j] < d_max:
-                repulse[j] = [(d_max - dist[j]) * g for g in obs_gradient(band[j][:2], obs)]
-        for j in range(n):
-            repulse[j] = [max(-0.5, min(0.5, repulse[j][0])), max(-0.5, min(0.5, repulse[j][1])), 0]
-            None
-
-        # Update the band
-        for j in range(n):
-            band[j][0] += delta_t * force[j][0]
-            band[j][1] += delta_t * force[j][1]
-            band[j][0] += delta_t * repulse[j][0]
-            band[j][1] += delta_t * repulse[j][1]
-
-    # Return the updated path
-    return [point[:2] for point in band[1:-1]]
-
-def obs_distance(p, obs):
-    """
-    Compute the distance from point p to the nearest obstacle
-    """
-    return min([math.sqrt((p[0] - o[0])**2 + (p[1] - o[1])**2) for o in obs])
-
-def obs_gradient(p, obs):
-    """
-    Compute the gradient of the distance function around point p
-    """
-    epsilon = 0.1
-    dx = obs_distance([p[0] + epsilon, p[1]], obs) - obs_distance([p[0] - epsilon, p[1]], obs)
-    dy = obs_distance([p[0], p[1] + epsilon], obs) - obs_distance([p[0], p[1] - epsilon], obs)
-    return [dx / (2 * epsilon), dy / (2 * epsilon), 0]
-
 
 if __name__ == '__main__':
     # 관련 매개 변수 설정
@@ -144,7 +84,6 @@ if __name__ == '__main__':
     obs = [[15,i] for i in range(40)]
     obs.extend([25,i] for i in range(40))
     obs.extend([[16,10],[17,10],[18,10],[19,10],[20,30],[16,30],[17,30],[18,30],[19,30],[20,30],[24,20],[23,20],[22,20],[21,20],[20,20]])
-    print('obstacles: {0}'.format(obs))
     for i in range(0):
         obs.append([random.uniform(2, goal[1] - 1), random.uniform(2, goal[1] - 1)])
 
@@ -166,8 +105,8 @@ if __name__ == '__main__':
 
     if apf.is_path_plan_success:
         path_ = []
-
-        path = elastic_band_path_planning(path=apf.path,obs=obs)
+        eb = elastic_band.Elastic_Band(path=apf.path,obs=obs)
+        path = eb.elastic_band_path_planning()
 
         i = int(step_size_ / step_size)
         while (i < len(path)):
