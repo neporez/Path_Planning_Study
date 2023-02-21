@@ -20,4 +20,9 @@
 ### APF(Artificial Potential Field) + EB(Elastic Band)
 
 
+
+![Screenshot from 2023-02-18 18-36-41](https://user-images.githubusercontent.com/88701811/220271905-3bb2676f-6823-4f69-99c4-4b13ee86da44.png)
+
+
+
 파란색은 출발점부터 도착점까지의 경로를 Improved APF를 적용시킨 경로이고 검은색은 파란색 경로를 Elastic Band를 적용시킨 결과이다.
