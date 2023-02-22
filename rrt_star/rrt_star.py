@@ -36,11 +36,12 @@ class RRTStar:
                 near_nodes = self.find_near(new_node)
                 self.rewire(new_node, near_nodes)
                 self.nodes.append(new_node)
-                try:
-                    ax.plot([new_node.x, new_node.parent.x], [new_node.y,new_node.parent.y],color = 'black')
-                    plt.pause(0.005)
-                except :
-                    None
+        for node in self.nodes :
+            if node.parent :
+                  ax.plot([node.x, node.parent.x], [node.y, node.parent.y], color='black')
+        
+        
+                
 
     def sample(self):
         if random.random() > self.delta:
@@ -69,7 +70,8 @@ class RRTStar:
         return True
 
     def find_near(self, node):
-        radius = min(50, math.sqrt(100 * math.log(len(self.nodes)) / len(self.nodes)))
+        #radius = min(50, math.sqrt(100 * math.log(len(self.nodes)) / len(self.nodes)))
+        radius = 1.5
         distances = [(n.x - node.x) ** 2 + (n.y - node.y) ** 2 for n in self.nodes]
         return [n for i, n in enumerate(self.nodes) if distances[i] < radius ** 2]
 
@@ -93,7 +95,6 @@ class RRTStar:
 
     def get_path(self):
         path = []
-        #node = self.nodes[self.nodes.index(self.goal)]
 
         goalpoint=self.find_goal_point_nearest()
 
@@ -114,8 +115,8 @@ class RRTStar:
 if __name__ == "__main__" :
     start, goal = (20,0), (20, 40)
     epsilon = 0.2
-    delta_goal_bias = 0.3
-    iter = 1000
+    delta_goal_bias = 0.1
+    iter = 10000
     obs_r = 1
     step_size = 5
     obs = []
