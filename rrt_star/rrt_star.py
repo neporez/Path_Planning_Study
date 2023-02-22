@@ -27,7 +27,7 @@ class RRTStar:
         self.nodes = [self.start]
 
     def run(self):
-        ax = plt.subplot()
+        
         for i in range(self.max_iter):
             q = self.sample()
             nearest_node = self.find_nearest(q)
@@ -36,6 +36,7 @@ class RRTStar:
                 near_nodes = self.find_near(new_node)
                 self.rewire(new_node, near_nodes)
                 self.nodes.append(new_node)
+        ax = plt.subplot()
         for node in self.nodes :
             if node.parent :
                   ax.plot([node.x, node.parent.x], [node.y, node.parent.y], color='black')
@@ -116,7 +117,7 @@ if __name__ == "__main__" :
     start, goal = (20,0), (20, 40)
     epsilon = 0.2
     delta_goal_bias = 0.1
-    iter = 10000
+    iter = 5000
     obs_r = 1
     step_size = 5
     obs = []
