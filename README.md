@@ -9,7 +9,7 @@
 
 
 
-![iter10000](https://user-images.githubusercontent.com/88701811/220271190-04eb70b8-8d1c-4701-97c1-4fdc23c234dd.png)
+![캡처](https://user-images.githubusercontent.com/88701811/220566477-9f6b7c9a-eae2-4dc7-ae80-47f4c0a3ac84.PNG)
 
 
 
