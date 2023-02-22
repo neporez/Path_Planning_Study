@@ -80,6 +80,7 @@ if __name__ == '__main__':
         subplot.plot(start[0], start[1], '*r')
         subplot.plot(goal[0], goal[1], '*r')
     # '장애물 설정 및 그리기'
+    
     obs = []
     obs = [[15,i] for i in range(40)]
     obs.extend([25,i] for i in range(40))
@@ -94,14 +95,13 @@ if __name__ == '__main__':
             subplot.plot(OB[0], OB[1], 'xk')
     # t1 = time.time()
     # for i in range(1000):
-
     # path plan
     if is_plot:
         apf = APF_Improved(start, goal, obs, k_att, k_rep, rr, step_size, max_iters, goal_threashold, is_plot)
     else:
         apf = APF_Improved(start, goal, obs, k_att, k_rep, rr, step_size, max_iters, goal_threashold, is_plot)
     apf.path_plan()
-
+    
 
     if apf.is_path_plan_success:
         path_ = []
