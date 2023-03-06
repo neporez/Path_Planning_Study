@@ -2,17 +2,19 @@
 https://github.com/ShuiXinYun/Path_Plan/tree/master/Artificial_Potential_Field
 "개선된 인공 유력장 방법을 구현한 인공 유력장 알고리즘. 불가능 문제를 해결하였으나, 여전히 지역 최소점 문제가 존재한다."
 """
-from Original_APF import APF, Vector2d
+
 import matplotlib.pyplot as plt
 import math
 from matplotlib.patches import Circle
 import random
 import sys,os
 
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
+
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 
 from elastic_band import elastic_band
-
+from apf_module import APF, Vector2d
 
 def check_vec_angle(v1: Vector2d, v2: Vector2d):
     v1_v2 = v1.deltaX * v2.deltaX + v1.deltaY * v2.deltaY

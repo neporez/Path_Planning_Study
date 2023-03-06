@@ -2,7 +2,7 @@ import math
 
 class Elastic_Band :
 
-    def __init__(self, path, obs, max_iters=100, k=5, d_min=1.0, d_max=3.0, delta_t=0.1) :
+    def __init__(self, path, obs, max_iters=100, k=5, d_min=0.6, d_max=2.0, delta_t=0.1) :
         self.path = path
         self.obs = obs
         self.max_iters = max_iters

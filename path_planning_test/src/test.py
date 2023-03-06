@@ -41,9 +41,9 @@ class RRTStar:
         for node in self.nodes :
             if node.parent :
                   ax.plot([node.x, node.parent.x], [node.y, node.parent.y], color='black')
-        
 
-                
+
+
 
     def sample(self):
         if random.random() > self.delta:
@@ -124,13 +124,13 @@ class RRTStar:
 
 
 if __name__ == "__main__" :
-    start, goal = (20,0), (20, 40)
+    start, goal = (20,25), (20, 35)
     epsilon = 0.2
-    delta_goal_bias = 0.1
-    iter = 500
-    obs_r = 1
+    delta_goal_bias = 0.2
+    iter = 1000
+    obs_r = 0.7
     step_size = 5
-    
+
     rx = []
     ry = []
     ryaw = []
@@ -140,15 +140,15 @@ if __name__ == "__main__" :
 
 
     obs = []
-    obs = [[15,i,obs_r] for i in range(40)]
-    obs.extend([25,i,obs_r] for i in range(40))
-    obs.extend([[16,10,obs_r],[17,10,obs_r],[18,10,obs_r],[19,10,obs_r],[20,30,obs_r],[16,30,obs_r],[17,30,obs_r],[18,30,obs_r],[19,30,obs_r],[20,30,obs_r],[24,20,obs_r],[23,20,obs_r],[22,20,obs_r],[21,20,obs_r],[20,20,obs_r]])
+    obs = [[18,i,obs_r] for i in range(40)]
+    obs.extend([22,i,obs_r] for i in range(40))
+    obs.extend([[16,10,obs_r],[17,10,obs_r],[18,10,obs_r],[19,10,obs_r],[20,30,obs_r],[19,30,obs_r],[20,30,obs_r],[24,20,obs_r],[23,20,obs_r],[22,20,obs_r],[21,20,obs_r],[20,20,obs_r]])
 
     fig = plt.figure(figsize=(7, 7))
     subplot = fig.add_subplot(111)
     subplot.set_xlabel('X-distance: m')
     subplot.set_ylabel('Y-distance: m')
-    subplot.axis([0, 40, 0, 40])
+    subplot.axis([10, 30, 20, 40])
     subplot.plot(start[0], start[1], '*r')
     subplot.plot(goal[0], goal[1], '*r')
 
@@ -168,8 +168,8 @@ if __name__ == "__main__" :
     rx, ry, ryaw, rk , rdk, s = cubic_spline_planner.calc_spline_course(path[0],path[1],ds=0.5)
 
     obs = []
-    obs = [[15,i] for i in range(40)]
-    obs.extend([25,i] for i in range(40))
+    obs = [[18,i] for i in range(40)]
+    obs.extend([22,i] for i in range(40))
     obs.extend([[16,10],[17,10],[18,10],[19,10],[20,30],[16,30],[17,30],[18,30],[19,30],[20,30],[24,20],[23,20],[22,20],[21,20],[20,20]])
 
     path = np.transpose([rx,ry])
