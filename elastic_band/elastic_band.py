@@ -2,7 +2,7 @@ import math
 
 class Elastic_Band :
 
-    def __init__(self, path, obs, max_iters=100, k=1, d_min=10.0, d_max=15.0, delta_t=0.1) :
+    def __init__(self, path, obs, max_iters=100, k=5, d_min=1.0, d_max=3.0, delta_t=0.1) :
         self.path = path
         self.obs = obs
         self.max_iters = max_iters
@@ -15,9 +15,9 @@ class Elastic_Band :
         # Initialize the elastic band
         band = []
         for point in self.path:
-            band.append(point + [0])
-        band.insert(0, [0, 0, -math.pi/2])
-        band.append([0, 0, -math.pi/2])
+            band.append(point)
+        band.insert(0, [self.path[0][0], self.path[0][1]])
+        band.append([self.path[-1][0], self.path[-1][1]])
         n = len(band)
 
 
@@ -26,7 +26,7 @@ class Elastic_Band :
             # Compute the distance to obstacles
             dist = []
             for j in range(n):
-                dist.append(self.obs_distance(band[j][:2], self.obs))
+                dist.append(self.obs_distance(band[j], self.obs))
 
             # Compute the elastic band forces
             force = [[0, 0, 0]] * n

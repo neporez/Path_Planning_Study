@@ -46,7 +46,16 @@ class RRTStar:
 
     def sample(self):
         if random.random() > self.delta:
-            return Node(random.uniform(0, 40), random.uniform(0, 40))
+            theta = math.atan2(self.goal.y - self.start.y, self.goal.x - self.start.x)
+            dist = math.sqrt((self.goal.y - self.start.y)**2 + (self.goal.x - self.start.x)**2)
+
+            # Generate a random point within a fan-shaped area around the line connecting start and goal nodes
+            radius = random.uniform(0, dist)
+            angle = random.uniform(-math.pi/3, math.pi/3)
+            x = self.start.x + radius * math.cos(theta + angle)
+            y = self.start.y + radius * math.sin(theta + angle)
+
+            return Node(x, y)
         else:
             return self.goal
 
@@ -117,7 +126,7 @@ if __name__ == "__main__" :
     start, goal = (20,0), (20, 40)
     epsilon = 0.2
     delta_goal_bias = 0.1
-    iter = 5000
+    iter = 4000
     obs_r = 1
     step_size = 5
     obs = []
