@@ -163,20 +163,25 @@ if __name__ == "__main__" :
 
     path = rrts.get_path()
 
-    path = np.transpose(path)
-
-    rx, ry, ryaw, rk , rdk, s = cubic_spline_planner.calc_spline_course(path[0],path[1],ds=0.5)
+    
 
     obs = []
     obs = [[18,i] for i in range(40)]
     obs.extend([22,i] for i in range(40))
     obs.extend([[16,10],[17,10],[18,10],[19,10],[20,30],[16,30],[17,30],[18,30],[19,30],[20,30],[24,20],[23,20],[22,20],[21,20],[20,20]])
 
-    path = np.transpose([rx,ry])
+    
 
     eb = elastic_band.Elastic_Band(path=path,obs=obs)
 
     path = eb.elastic_band_path_planning()
+
+    path = np.transpose(path)
+
+    rx, ry, ryaw, rk , rdk, s = cubic_spline_planner.calc_spline_course(path[0],path[1],ds=0.5)
+
+    path = np.transpose([rx,ry])
+    
     ##################################
     #step_size 영향을 받는 부분, 지우면 모든 경로를 보여줌
     """

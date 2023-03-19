@@ -12,6 +12,8 @@ from math import pi
 from global_path import GlobalPath
 import frenet_path as frenet_path
 
+
+
 # Cost Weight
 W_OFFSET = 1 #safety cost 가중치
 W_CONSISTENCY = 0.5 #smoothness cost 가중치
@@ -48,7 +50,6 @@ class TrajectoryPlanner: # path planner
         # self.center.extend(np.load(file=PATH_ROOT+"obstacle/" + "snu_bus_line.npy"))
         # self.center.extend(np.load(file=PATH_ROOT+"obstacle/" + "PG_solidline.npy")) #대운동장
 
-        self.candidate_pub = rospy.Publisher('/CDpath', PointCloud, queue_size = 3)
         self.selected_pub = rospy.Publisher('/SLpath', PointCloud, queue_size = 3)
         self.curvature_pub = rospy.Publisher("curvature", Float64, queue_size=1)
 
@@ -119,4 +120,6 @@ class TrajectoryPlanner: # path planner
     def set_global_path(self, glob_path):
         self.glob_path = glob_path
 
+
+    def generate_path()
 
