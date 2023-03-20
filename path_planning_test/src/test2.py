@@ -42,7 +42,8 @@ class RRTStar:
         ax = plt.subplot()
         for node in self.nodes :
             if node.parent :
-                  ax.plot([node.x, node.parent.x], [node.y, node.parent.y], color='black')
+                  None
+                  #ax.plot([node.x, node.parent.x], [node.y, node.parent.y], color='green')
 
 
 
@@ -120,7 +121,7 @@ class RRTStar:
 
         ax = plt.subplot()
         for i in range(len(path) - 1):
-            ax.plot([path[i][0], path[i+1][0]], [path[i][1], path[i+1][1]], color='red',linewidth = 2)
+            ax.plot([path[i][0], path[i+1][0]], [path[i][1], path[i+1][1]], color='red',linewidth = 3)
 
         return path
 
@@ -145,7 +146,7 @@ if __name__ == "__main__" :
     obs = []
     obs = [[18,i,obs_r] for i in range(40)]
     obs.extend([22,i,obs_r] for i in range(40))
-    obs.extend([[16,10,obs_r],[17,10,obs_r],[18,10,obs_r],[19,10,obs_r],[20,30,obs_r],[19,30,obs_r],[20,30,obs_r],[24,20,obs_r],[23,20,obs_r],[22,20,obs_r],[21,20,obs_r],[20,20,obs_r]])
+    obs.extend([[16,10,obs_r],[17,10,obs_r],[18,10,obs_r],[19,10,obs_r],[20,30,obs_r],[19,30,obs_r],[20,30,obs_r],[21,20,obs_r],[20,20,obs_r]])
 
     fig = plt.figure(figsize=(7, 7))
     subplot = fig.add_subplot(111)
@@ -181,7 +182,7 @@ if __name__ == "__main__" :
 
     path = np.transpose(path)
 
-    rx, ry, ryaw, rk , rdk, s = cubic_spline_planner.calc_spline_course(path[0],path[1],ds=0.5)
+    rx, ry, ryaw, rk , rdk, s = cubic_spline_planner.calc_spline_course(path[0],path[1],ds=0.1)
 
     path = np.transpose([rx,ry])
     
@@ -197,7 +198,7 @@ if __name__ == "__main__" :
     """
     ##################################
     px, py = [K[0] for K in path], [K[1] for K in path]  # x 좌표 목록, y 좌표 목록
-    subplot.plot(px, py, '.b')
+    subplot.plot(px, py, '.g')
     print(time.time()-start_time)
     plt.show()
 

@@ -53,7 +53,7 @@ class RRTStar:
         ax = plt.subplot()
         for node in self.nodes :
             if node.parent :
-                  ax.plot([node.x, node.parent.x], [node.y, node.parent.y], color='black')
+                  ax.plot([node.x, node.parent.x], [node.y, node.parent.y], color='green')
 
 
 
@@ -181,9 +181,15 @@ class RRTStar:
 
         ax = plt.subplot()
         for i in range(len(path) - 1):
-            ax.plot([path[i][0], path[i+1][0]], [path[i][1], path[i+1][1]], color='red',linewidth = 2)
+            ax.plot([path[i][0], path[i+1][0]], [path[i][1], path[i+1][1]], color='red',linewidth = 3)
 
         return path
+
+def check_rrtstar_success(rrt_star_last_point, goal) :
+    dis = ((rrt_star_last_point[0]-goal[0])**2 + (rrt_star_last_point[1]-goal[1])**2)**0.5
+    if(dis >= 2) : #goal과 rrt_star_last_point의 거리가 2m 이상이면 다시 rrt* 생성
+        return True
+    return False
 
 
 if __name__ == "__main__" :
@@ -191,7 +197,7 @@ if __name__ == "__main__" :
     start, goal = (19.5,25), (20, 35)
     epsilon = 0.2
     delta_goal_bias = 0.2
-    iter = 500
+    iter = 300
     obs_r = 0.4
     step_size = 5
 
@@ -230,16 +236,19 @@ if __name__ == "__main__" :
         ax.plot([LINE.p1.x, LINE.p2.x], [LINE.p1.y, LINE.p2.y], color='black')
 
     rrts = RRTStar(start=start, goal=goal, obstacles=obs,lines=lines , epsilon=epsilon, delta=delta_goal_bias,max_iter=iter)
-    rrts.run()
-
     
+    rrts.run()  
     path = rrts.get_path()
 
+    while check_rrtstar_success(path[-1], goal) :
+        print("regeneration")
+        rrts.run()
+        path = rrts.get_path()
     
 
     obs = []
-    #obs = [[19,i] for i in range(40)]
-    #obs.extend([21,i] for i in range(40))
+    obs = [[19,i] for i in range(40)]
+    obs.extend([21,i] for i in range(40))
     obs.extend([[16,10],[17,10],[18,10],[19,10],[20,30],[16,30],[17,30],[18,30],[19,30],[20,30],[24,20],[23,20],[22,20],[21,20],[20,20]])
 
     

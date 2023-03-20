@@ -43,9 +43,9 @@ class Elastic_Band :
             repulse = [[0, 0, 0]] * n
             for j in range(1, n - 1):
                 if dist[j] < self.d_min:
-                    repulse[j] = [(self.d_min - dist[j]) * g for g in self.obs_gradient(band[j][:2], self.obs)]
+                    repulse[j] = [(self.d_min - dist[j]) * g for g in self.obs_gradient(band[j], self.obs)]
                 elif self.d_min <= dist[j] < self.d_max:
-                    repulse[j] = [(self.d_max - dist[j]) * g for g in self.obs_gradient(band[j][:2], self.obs)]
+                    repulse[j] = [(self.d_max - dist[j]) * g for g in self.obs_gradient(band[j], self.obs)]
             for j in range(n):
                 repulse[j] = [max(-0.5, min(0.5, repulse[j][0])), max(-0.5, min(0.5, repulse[j][1])), 0]
                 None
@@ -58,7 +58,7 @@ class Elastic_Band :
                 band[j][1] += self.delta_t * repulse[j][1]
 
         # Return the updated path
-        return [point[:2] for point in band[1:-1]]
+        return band
 
     def obs_distance(self, p, obs):
         """
